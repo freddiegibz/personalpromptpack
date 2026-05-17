@@ -26,7 +26,7 @@ export default async function handler(request, response) {
       await put(PATHNAME, body, {
         access: "public",
         addRandomSuffix: false,
-        overwrite: true,
+      allowOverwrite: true,
         contentType: "application/json",
         cacheControlMaxAge: 0,
       });
