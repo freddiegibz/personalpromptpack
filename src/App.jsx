@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "prompt-library-data";
 const accentColors = ["#E8845C", "#4CAF80", "#7C6BC4"];
 const makeId = () => crypto.randomUUID();
 
@@ -12,17 +11,10 @@ const LIBRARY_CONFIG = {
     "Create categories, save individual prompts, and group multi-step prompt processes into processes.",
 };
 
-const loadLibrary = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
 export default function App() {
-  const [categories, setCategories] = useState(loadLibrary);
+  const [categories, setCategories] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [saveState, setSaveState] = useState("idle");
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeType, setActiveType] = useState("prompts");
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,8 +45,31 @@ export default function App() {
     categories.find((category) => category.id === activeCategoryId) ?? null;
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
-  }, [categories]);
+    const loadCategories = async () => {
+      const response = await fetch("/api/library", { cache: "no-store" });
+      const data = await response.json();
+      setCategories(Array.isArray(data) ? data : []);
+      setIsLoaded(true);
+    };
+
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const timeout = window.setTimeout(async () => {
+      setSaveState("saving");
+      await fetch("/api/library", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categories),
+      });
+      setSaveState("saved");
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [categories, isLoaded]);
 
   useEffect(() => {
     if (!activeCategoryId && categories.length > 0) {
@@ -402,6 +417,18 @@ export default function App() {
       </header>
 
       <main style={{ maxWidth: 680, margin: "0 auto", padding: "28px 20px 40px" }}>
+        <div
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 10,
+            color: "#6B6575",
+            textTransform: "uppercase",
+            letterSpacing: 1.5,
+            marginBottom: 12,
+          }}
+        >
+          {!isLoaded ? "Loading library..." : saveState === "saving" ? "Saving..." : "Saved"}
+        </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
           {categories.map((category, index) => (
             <button
