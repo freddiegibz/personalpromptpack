@@ -15,6 +15,7 @@ export default function App() {
   const [categories, setCategories] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [saveState, setSaveState] = useState("idle");
+  const [loadError, setLoadError] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeType, setActiveType] = useState("prompts");
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,10 +47,20 @@ export default function App() {
 
   useEffect(() => {
     const loadCategories = async () => {
-      const response = await fetch("/api/library", { cache: "no-store" });
-      const data = await response.json();
-      setCategories(Array.isArray(data) ? data : []);
-      setIsLoaded(true);
+      try {
+        const response = await fetch("/api/library", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Library load failed (${response.status})`);
+        }
+        const data = await response.json();
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setLoadError(
+          error instanceof Error ? error.message : "Could not load library",
+        );
+      } finally {
+        setIsLoaded(true);
+      }
     };
 
     loadCategories();
@@ -427,7 +438,13 @@ export default function App() {
             marginBottom: 12,
           }}
         >
-          {!isLoaded ? "Loading library..." : saveState === "saving" ? "Saving..." : "Saved"}
+          {!isLoaded
+            ? "Loading library..."
+            : loadError
+              ? loadError
+              : saveState === "saving"
+                ? "Saving..."
+                : "Saved"}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
           {categories.map((category, index) => (
