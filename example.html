@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A-Z Library</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import { createAZLibrary } from "./az-library.js";
+
+      createAZLibrary({
+        mount: "#app",
+        config: {
+          title: "Personal Prompt Pack Library",
+          titleAccent: "Library",
+          subtitle: "PROMPT PACK TEMPLATE",
+          heroDescription: "A ready-to-edit A-Z prompt library you can load directly in the browser.",
+          ctaText: "Get the Pack",
+          ctaUrl: "https://example.com",
+          videoUrl: "",
+        },
+        entries: [
+          {
+            letter: "A",
+            name: "Audience Mirror",
+            icon: "🪞",
+            summary: "Clarify who the prompt is really for.",
+            details: "Use this when the output feels generic and needs sharper audience fit.",
+            example: "Rewrite this offer for busy tradespeople who skim on mobile.",
+            whoItsFor: "Marketers, copywriters, product builders.",
+          },
+          {
+            letter: "B",
+            name: "Brief Builder",
+            icon: "🧱",
+            summary: "Turn a rough idea into a usable brief.",
+            details: "Useful when you know the goal but not yet the structure.",
+            example: "Create a campaign brief from these scattered notes.",
+            whoItsFor: "Founders, strategists, operators.",
+          },
+        ],
+        categories: [
+          { label: "All", filter: null },
+          { label: "Strategy", filter: ["A", "B"] },
+        ],
+      });
+    </script>
+  </body>
+</html>
