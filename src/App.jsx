@@ -47,6 +47,7 @@ export default function App() {
   const [pendingDeleteProcessPromptId, setPendingDeleteProcessPromptId] =
     useState(null);
   const [pendingDeleteProcessId, setPendingDeleteProcessId] = useState(null);
+  const [copiedPromptId, setCopiedPromptId] = useState(null);
 
   const activeCategory =
     categories.find((category) => category.id === activeCategoryId) ?? null;
@@ -318,6 +319,14 @@ export default function App() {
     );
     setPendingDeleteProcessId(null);
     if (expandedId === processId) setExpandedId(null);
+  };
+
+  const copyPrompt = async (promptId, text) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedPromptId(promptId);
+    window.setTimeout(() => {
+      setCopiedPromptId((current) => (current === promptId ? null : current));
+    }, 1200);
   };
 
   return (
@@ -941,20 +950,41 @@ export default function App() {
                               </button>
                             </form>
                           ) : (
-                            <button
-                              className="pill"
-                              onClick={() => beginEdit(item)}
+                            <div
                               style={{
+                                display: "flex",
+                                gap: 8,
+                                flexWrap: "wrap",
                                 marginTop: 14,
-                                padding: "8px 14px",
-                                borderRadius: 20,
-                                border: "1px dashed rgba(45,42,51,0.18)",
-                                background: "#FFFFFF",
-                                color: "#6B6575",
                               }}
                             >
-                              Edit
-                            </button>
+                              <button
+                                className="pill"
+                                onClick={() => copyPrompt(item.id, item.text)}
+                                style={{
+                                  padding: "8px 14px",
+                                  borderRadius: 20,
+                                  border: "1px solid rgba(45,42,51,0.08)",
+                                  background: "rgba(76,175,128,0.12)",
+                                  color: "#4CAF80",
+                                }}
+                              >
+                                {copiedPromptId === item.id ? "Copied" : "Copy"}
+                              </button>
+                              <button
+                                className="pill"
+                                onClick={() => beginEdit(item)}
+                                style={{
+                                  padding: "8px 14px",
+                                  borderRadius: 20,
+                                  border: "1px dashed rgba(45,42,51,0.18)",
+                                  background: "#FFFFFF",
+                                  color: "#6B6575",
+                                }}
+                              >
+                                Edit
+                              </button>
+                            </div>
                           ))}
                         {activeType === "processes" && (
                           <div style={{ marginTop: 14 }}>
@@ -1134,7 +1164,36 @@ export default function App() {
                                           ) : (
                                             <>
                                               {prompt.text}
-                                              <div>
+                                              <div
+                                                style={{
+                                                  display: "flex",
+                                                  gap: 8,
+                                                  flexWrap: "wrap",
+                                                }}
+                                              >
+                                                <button
+                                                  className="pill"
+                                                  onClick={() =>
+                                                    copyPrompt(
+                                                      prompt.id,
+                                                      prompt.text,
+                                                    )
+                                                  }
+                                                  style={{
+                                                    marginTop: 14,
+                                                    padding: "8px 14px",
+                                                    borderRadius: 20,
+                                                    border:
+                                                      "1px solid rgba(45,42,51,0.08)",
+                                                    background:
+                                                      "rgba(76,175,128,0.12)",
+                                                    color: "#4CAF80",
+                                                  }}
+                                                >
+                                                  {copiedPromptId === prompt.id
+                                                    ? "Copied"
+                                                    : "Copy"}
+                                                </button>
                                                 <button
                                                   className="pill"
                                                   onClick={() =>
