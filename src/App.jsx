@@ -372,6 +372,25 @@ export default function App() {
         .pill, .entry-card, .save-btn { transition: all 0.2s ease; }
         .pill:hover, .pill:focus-visible { transform: translateY(-1px); }
         .entry-card:hover { box-shadow: 0 4px 16px rgba(45,42,51,0.08); }
+        .pill-rail {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
+        }
+        .pill-rail > * {
+          flex: 0 0 auto;
+        }
+        .pill-rail::-webkit-scrollbar {
+          height: 6px;
+        }
+        .pill-rail::-webkit-scrollbar-thumb {
+          background: rgba(45,42,51,0.18);
+          border-radius: 999px;
+        }
         @media (max-width: 640px) {
           .hero-title { font-size: 28px !important; }
           .composer-grid { grid-template-columns: 1fr !important; }
@@ -446,7 +465,7 @@ export default function App() {
                 ? "Saving..."
                 : "Saved"}
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
+        <div className="pill-rail" style={{ marginBottom: 16 }}>
           {categories.map((category, index) => (
             <button
               key={category.id}
@@ -619,8 +638,7 @@ export default function App() {
               </div>
             )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 14 }}>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <div className="pill-rail" style={{ marginBottom: 14 }}>
               {["prompts", "processes"].map((type) => (
                 <button
                   key={type}
@@ -642,7 +660,6 @@ export default function App() {
                   {type}
                 </button>
               ))}
-              </div>
               <button
                 className="pill"
                 onClick={() => setShowComposer((current) => !current)}
