@@ -951,10 +951,58 @@ export default function App() {
 
                     {isOpen && (
                       <div style={{ padding: "0 18px 18px" }}>
+                        {activeType === "prompts" &&
+                          editingPromptId !== item.id && (
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                flexWrap: "wrap",
+                                paddingTop: 14,
+                                marginBottom: 14,
+                                borderTop: `1px solid ${accent}30`,
+                              }}
+                            >
+                              <button
+                                className="pill"
+                                onClick={() => copyPrompt(item.id, item.text)}
+                                style={{
+                                  padding: "8px 14px",
+                                  borderRadius: 20,
+                                  border: "1px solid rgba(45,42,51,0.08)",
+                                  background: "rgba(76,175,128,0.12)",
+                                  color: "#4CAF80",
+                                }}
+                              >
+                                {copiedPromptId === item.id ? "Copied" : "Copy"}
+                              </button>
+                              <button
+                                className="pill"
+                                onClick={() => beginEdit(item)}
+                                style={{
+                                  padding: "8px 14px",
+                                  borderRadius: 20,
+                                  border: "1px dashed rgba(45,42,51,0.18)",
+                                  background: "#FFFFFF",
+                                  color: "#6B6575",
+                                }}
+                              >
+                                Edit
+                              </button>
+                            </div>
+                          )}
                         <div
                           style={{
-                            borderTop: `1px solid ${accent}30`,
-                            paddingTop: 14,
+                            borderTop:
+                              activeType === "prompts" &&
+                              editingPromptId !== item.id
+                                ? "none"
+                                : `1px solid ${accent}30`,
+                            paddingTop:
+                              activeType === "prompts" &&
+                              editingPromptId !== item.id
+                                ? 0
+                                : 14,
                             color: "#4A4555",
                             lineHeight: 1.7,
                             whiteSpace: "pre-wrap",
@@ -1010,43 +1058,7 @@ export default function App() {
                                 Save
                               </button>
                             </form>
-                          ) : (
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: 8,
-                                flexWrap: "wrap",
-                                marginTop: 14,
-                              }}
-                            >
-                              <button
-                                className="pill"
-                                onClick={() => copyPrompt(item.id, item.text)}
-                                style={{
-                                  padding: "8px 14px",
-                                  borderRadius: 20,
-                                  border: "1px solid rgba(45,42,51,0.08)",
-                                  background: "rgba(76,175,128,0.12)",
-                                  color: "#4CAF80",
-                                }}
-                              >
-                                {copiedPromptId === item.id ? "Copied" : "Copy"}
-                              </button>
-                              <button
-                                className="pill"
-                                onClick={() => beginEdit(item)}
-                                style={{
-                                  padding: "8px 14px",
-                                  borderRadius: 20,
-                                  border: "1px dashed rgba(45,42,51,0.18)",
-                                  background: "#FFFFFF",
-                                  color: "#6B6575",
-                                }}
-                              >
-                                Edit
-                              </button>
-                            </div>
-                          ))}
+                          ) : null)}
                         {activeType === "processes" && (
                           <div style={{ marginTop: 14 }}>
                             {item.prompts.length > 0 && (
@@ -1224,12 +1236,12 @@ export default function App() {
                                             </form>
                                           ) : (
                                             <>
-                                              {prompt.text}
                                               <div
                                                 style={{
                                                   display: "flex",
                                                   gap: 8,
                                                   flexWrap: "wrap",
+                                                  marginBottom: 12,
                                                 }}
                                               >
                                                 <button
@@ -1241,7 +1253,6 @@ export default function App() {
                                                     )
                                                   }
                                                   style={{
-                                                    marginTop: 14,
                                                     padding: "8px 14px",
                                                     borderRadius: 20,
                                                     border:
@@ -1261,7 +1272,6 @@ export default function App() {
                                                     beginFolderPromptEdit(prompt)
                                                   }
                                                   style={{
-                                                    marginTop: 14,
                                                     padding: "8px 14px",
                                                     borderRadius: 20,
                                                     border:
@@ -1273,6 +1283,7 @@ export default function App() {
                                                   Edit
                                                 </button>
                                               </div>
+                                              {prompt.text}
                                             </>
                                           )}
                                         </div>
