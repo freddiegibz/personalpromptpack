@@ -41,6 +41,7 @@ export default function App() {
     useState(null);
   const [pendingDeleteProcessId, setPendingDeleteProcessId] = useState(null);
   const [copiedPromptId, setCopiedPromptId] = useState(null);
+  const [dragState, setDragState] = useState(null);
 
   const activeCategory =
     categories.find((category) => category.id === activeCategoryId) ?? null;
@@ -353,6 +354,65 @@ export default function App() {
     window.setTimeout(() => {
       setCopiedPromptId((current) => (current === promptId ? null : current));
     }, 1200);
+  };
+
+  const moveProcessPrompt = (processId, fromIndex, toIndex) => {
+    if (!activeCategory || fromIndex === toIndex || toIndex < 0) return;
+
+    setCategories((current) =>
+      current.map((category) =>
+        category.id === activeCategory.id
+          ? {
+              ...category,
+              folders: category.folders.map((folder) => {
+                if (folder.id !== processId) return folder;
+
+                const prompts = [...folder.prompts];
+                const [movedPrompt] = prompts.splice(fromIndex, 1);
+                prompts.splice(toIndex, 0, movedPrompt);
+                return { ...folder, prompts };
+              }),
+            }
+          : category,
+      ),
+    );
+  };
+
+  const startPromptDrag = (event, processId, promptId, index) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragState({
+      processId,
+      promptId,
+      fromIndex: index,
+      currentIndex: index,
+      startY: event.clientY,
+    });
+  };
+
+  const updatePromptDrag = (event, processId, promptCount) => {
+    if (!dragState || dragState.processId !== processId) return;
+    const deltaY = event.clientY - dragState.startY;
+    const step = Math.round(deltaY / 56);
+    const nextIndex = Math.max(
+      0,
+      Math.min(promptCount - 1, dragState.fromIndex + step),
+    );
+
+    if (nextIndex !== dragState.currentIndex) {
+      setDragState((current) =>
+        current ? { ...current, currentIndex: nextIndex } : current,
+      );
+    }
+  };
+
+  const endPromptDrag = () => {
+    if (!dragState) return;
+    moveProcessPrompt(
+      dragState.processId,
+      dragState.fromIndex,
+      dragState.currentIndex,
+    );
+    setDragState(null);
   };
 
   return (
@@ -1069,9 +1129,11 @@ export default function App() {
                                   marginBottom: 14,
                                 }}
                               >
-                                {item.prompts.map((prompt) => {
+                                {item.prompts.map((prompt, promptIndex) => {
                                   const promptIsOpen =
                                     expandedFolderPromptId === prompt.id;
+                                  const isDragging =
+                                    dragState?.promptId === prompt.id;
 
                                   return (
                                     <div
@@ -1081,6 +1143,7 @@ export default function App() {
                                         borderRadius: 12,
                                         background: "#FFFFFF",
                                         overflow: "hidden",
+                                        opacity: isDragging ? 0.7 : 1,
                                       }}
                                     >
                                       <button
@@ -1100,7 +1163,44 @@ export default function App() {
                                           textAlign: "left",
                                         }}
                                       >
-                                        <span>{prompt.title}</span>
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 10,
+                                          }}
+                                        >
+                                          <span
+                                            onPointerDown={(event) =>
+                                              startPromptDrag(
+                                                event,
+                                                item.id,
+                                                prompt.id,
+                                                promptIndex,
+                                              )
+                                            }
+                                            onPointerMove={(event) =>
+                                              updatePromptDrag(
+                                                event,
+                                                item.id,
+                                                item.prompts.length,
+                                              )
+                                            }
+                                            onPointerUp={endPromptDrag}
+                                            onPointerCancel={endPromptDrag}
+                                            style={{
+                                              color: "#9B95A5",
+                                              cursor: "grab",
+                                              touchAction: "none",
+                                              userSelect: "none",
+                                              fontSize: 16,
+                                            }}
+                                            aria-label={`Reorder ${prompt.title}`}
+                                          >
+                                            ☰
+                                          </span>
+                                          <span>{prompt.title}</span>
+                                        </span>
                                         <span
                                           style={{
                                             display: "flex",
